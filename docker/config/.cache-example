@@ -1,0 +1,3 @@
+// This is the cache file for spotipy, the lib used by bathbuddy webapp, its caching the spotify login creds, so may start the container once, authenticate and copy this file to the host, afterwards restart the container with the cache file mounted
+// Content is like this
+{"access_token": "XXX", "token_type": "Bearer", "expires_in": 3600, "refresh_token": "XXX", "scope": "playlist-read-collaborative playlist-read-private streaming user-modify-playback-state user-read-playback-state", "expires_at": 1651239579}
