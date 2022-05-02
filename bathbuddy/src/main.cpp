@@ -5,7 +5,7 @@
 #include <secrets.h>
 
 // Comment out when compiling for ESP8266-01S
-#define NODEMCU
+//#define NODEMCU
 
 #ifdef NODEMCU
 const int PIN_TOOTH = 14; //D5
@@ -13,9 +13,9 @@ const int PIN_HAND = 12; //D6
 const int PIN_INFINI = 13; //D7
 const int STATUS_LED = 2; //internal LED give some feedback
 #else
-const int PIN_TOOTH = 0;
-const int PIN_HAND = 2;
-const int PIN_INFINI = 3;
+const int PIN_TOOTH = 0; // IO0
+const int PIN_HAND = 1; // IO2
+const int PIN_INFINI = 3; // RX
 #endif
 
 
@@ -75,6 +75,7 @@ void pressFeedback() {
 
 void setup() {
   delay(2000);
+
   // since we use 3 pins, we can only debug when using a nodemcu board
   #ifdef NODEMCU
   Serial.begin(115200);
@@ -91,6 +92,10 @@ void setup() {
   pinMode(PIN_TOOTH, INPUT_PULLUP);
   pinMode(PIN_HAND, INPUT_PULLUP);
   pinMode(PIN_INFINI, INPUT_PULLUP);
+
+  #ifdef NODEMCU
+  Serial.println("Pins initialized");
+  #endif
 }
 
 void loop() {
@@ -105,6 +110,7 @@ void loop() {
     http.begin(client, "http://" + String(RASPI_IP) + "/toothbrush");
     http.GET();
     http.end();
+    delay(500);
   }
   if (btn_hand == LOW) {
     #ifdef NODEMCU
@@ -114,6 +120,7 @@ void loop() {
     http.begin(client, "http://" + String(RASPI_IP) + "/handwash");
     http.GET();
     http.end();
+    delay(500);
   }
   if (btn_infini == LOW) {
     #ifdef NODEMCU
@@ -123,10 +130,7 @@ void loop() {
     http.begin(client, "http://" + String(RASPI_IP) + "/infinite");
     http.GET();
     http.end();
+    delay(500);
   }
 
-  #ifdef NODEMCU
-  Serial.println("I'm awake, but I'm going into deep sleep mode until RESET pin is connected to a LOW signal");
-  #endif
-  ESP.deepSleep(0);
 }
