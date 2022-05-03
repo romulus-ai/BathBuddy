@@ -129,7 +129,7 @@ def check_bathplayer(bathplayer_name):
 def restart_spotifyd():
   for container in docker_client.containers.list():
     if "spotifyd" in container.attrs['Config']['Image']:
-      if "spotifyd" in container.attrs['Config']['Name']:
+      if "spotifyd" in container.attrs['name']:
         container.restart()
         return "Spotifyd restarted"
   return "Spotifyd not restarted"
