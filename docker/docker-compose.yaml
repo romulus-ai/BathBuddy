@@ -16,3 +16,4 @@ services:
     volumes:
       - /root/bathbuddy/config/settings.cfg:/app/settings.cfg
       - /root/bathbuddy/config/.cache:/app/.cache
+      - /var/run/docker.sock:/var/run/docker.sock:ro
