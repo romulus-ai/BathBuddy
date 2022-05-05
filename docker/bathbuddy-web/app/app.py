@@ -80,6 +80,8 @@ def fetch_bathplayer(bathplayer_name):
 def playmusic(duration):
     global isplaying
 
+    fetch_bathplayer(app.config["BATHPLAYER_NAME"])
+
     plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID"]
     offset = 0
 
@@ -123,15 +125,14 @@ def check_bathplayer(bathplayer_name):
   devices = spotify.devices()
   for device in devices['devices']:
     if device['name'] == bathplayer_name:
-      return "Spotifyd is running!"
+      return "Spotifyd session is ok!"
   return restart_spotifyd()
 
 def restart_spotifyd():
   for container in docker_client.containers.list():
     if "spotifyd" in container.attrs['Config']['Image']:
-      if "spotifyd" in container.attrs['name']:
-        container.restart()
-        return "Spotifyd restarted"
+      container.restart()
+      return "Spotifyd restarted"
   return "Spotifyd not restarted"
 
 def fetch_spotify_devices():

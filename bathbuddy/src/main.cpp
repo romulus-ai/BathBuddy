@@ -14,7 +14,7 @@ const int PIN_INFINI = 13; //D7
 const int STATUS_LED = 2; //internal LED give some feedback
 #else
 const int PIN_TOOTH = 0; // IO0
-const int PIN_HAND = 1; // IO2
+const int PIN_HAND = 1; // TX
 const int PIN_INFINI = 3; // RX
 #endif
 
