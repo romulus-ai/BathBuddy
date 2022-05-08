@@ -1,9 +1,13 @@
 # flask_web/app.py
 
 from flask import Flask
+from flask import render_template
+from flask import request
 import spotipy
 import random
 import docker
+import time
+import re
 from spotipy.oauth2 import SpotifyOAuth
 from time import sleep
 from threading import Thread
@@ -17,6 +21,41 @@ docker_client = ""
 scope = "user-read-playback-state,user-modify-playback-state,playlist-read-collaborative,playlist-read-private,streaming"
 isplaying = False
 devices = ""
+
+@app.route('/', methods=['POST', 'GET'])
+@app.route('/config', methods=['POST', 'GET'])
+def config():
+    if request.method == 'POST':
+      app.config['PLAYLIST_ID'] = request.form.get('playlist')
+      app.config['PLAYLIST_ID_1'] = request.form.get('playlist1')
+      app.config['PLAYLIST_ID_2'] = request.form.get('playlist2')
+      app.config['PLAYLIST_ID_3'] = request.form.get('playlist3')
+      app.config['TIMERANGE_1'] = verify_timerange(request.form.get('timerange1'))
+      app.config['TIMERANGE_2'] = verify_timerange(request.form.get('timerange2'))
+      app.config['TIMERANGE_3'] = verify_timerange(request.form.get('timerange3'))
+      app.config['NO_PLAY_TIME'] = verify_timerange(request.form.get('no_play_time'))
+
+      conffile = open("/app/settings.cfg","w+")
+      conffile.write("APP_ID = \"%s\"\n" % app.config['APP_ID'])
+      conffile.write("APP_SECRET = \"%s\"\n" % app.config['APP_SECRET'])
+      conffile.write("PLAYLIST_ID = \"%s\"\n" % app.config['PLAYLIST_ID'])
+      conffile.write("PLAYLIST_ID_1 = \"%s\"\n" % app.config['PLAYLIST_ID_1'])
+      conffile.write("PLAYLIST_ID_2 = \"%s\"\n" % app.config['PLAYLIST_ID_2'])
+      conffile.write("PLAYLIST_ID_3 = \"%s\"\n" % app.config['PLAYLIST_ID_3'])
+      conffile.write("TIMERANGE_1 = \"%s\"\n" % app.config['TIMERANGE_1'])
+      conffile.write("TIMERANGE_2 = \"%s\"\n" % app.config['TIMERANGE_2'])
+      conffile.write("TIMERANGE_3 = \"%s\"\n" % app.config['TIMERANGE_3'])
+      conffile.write("NO_PLAY_TIME = \"%s\"\n" % app.config['NO_PLAY_TIME'])
+      conffile.write("BATHPLAYER_NAME = \"%s\"\n" % app.config['BATHPLAYER_NAME'])
+      conffile.close()
+
+    playlist_names = {}
+    playlist_names[app.config['PLAYLIST_ID']] = verify_playlist(app.config['PLAYLIST_ID'])
+    playlist_names[app.config['PLAYLIST_ID_1']] = verify_playlist(app.config['PLAYLIST_ID_1'])
+    playlist_names[app.config['PLAYLIST_ID_2']] = verify_playlist(app.config['PLAYLIST_ID_2'])
+    playlist_names[app.config['PLAYLIST_ID_3']] = verify_playlist(app.config['PLAYLIST_ID_3'])
+
+    return render_template('config-input.html', config = app.config, playlist_names = playlist_names)
 
 @app.route('/handwash')
 def handwash():
@@ -82,7 +121,20 @@ def playmusic(duration):
 
     fetch_bathplayer(app.config["BATHPLAYER_NAME"])
 
+    if withinTimerange(app.config("NO_PLAY_TIME")):
+      return
+
     plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID"]
+    if withinTimerange(app.config("TIMERANGE1")):
+      if app.config["PLAYLIST_ID_1"] != "--":
+        plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID_1"]
+    if withinTimerange(app.config("TIMERANGE2")):
+      if app.config["PLAYLIST_ID_2"] != "--":
+        plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID_2"]
+    if withinTimerange(app.config("TIMERANGE3")):
+      if app.config["PLAYLIST_ID_3"] != "--":
+        plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID_3"]
+
     offset = 0
 
     playlist_tracks = []
@@ -99,8 +151,6 @@ def playmusic(duration):
       offset = offset + len(response['items'])
 
     random.shuffle(playlist_tracks)
-
-    print("playing music for " + str(duration) + " seconds")
 
     spotify.start_playback(device_id=device_id,uris=playlist_tracks)
     isplaying = True
@@ -138,6 +188,43 @@ def restart_spotifyd():
 def fetch_spotify_devices():
   global devices
   devices = spotify.devices()
+
+def verify_timerange(timerange):
+  pattern = re.compile("^((2[0-3]|[01]?[0-9])-(2[0-3]|[01]?[0-9]))|--$")
+  if pattern.match(timerange):
+    tr = timerange.split("-")
+    return timerange
+  if not timerange:
+    return "--"
+  raise Exception("Timerange not valid: %s\n" % timerange)
+
+def verify_playlist(playlist_id):
+  if not playlist_id:
+    return "--"
+  playlistname = spotify.playlist(playlist_id)['name']
+  return playlistname
+
+def withinTimerange(range):
+  if range == "--":
+    return False
+  timerange = range.split("-")
+
+  current_time = time.localtime()
+  today = time.strftime("%d %m %Y", current_time)
+
+  if timerange[0] <= timerange[1]:
+    range_begin = time.strptime(today + " " + timerange[0], "%d %m %Y %H")
+    range_end = time.strptime(today + " " + timerange[0], "%d %m %Y %H")
+  if timerange[0] > timerange[1]:
+    yesterday = time.localtime(time.time()-86400)
+    range_begin = time.strptime(yesterday + " " + timerange[0], "%d %m %Y %H")
+    range_end = time.strptime(today + " " + timerange[0], "%d %m %Y %H")
+
+  if current_time >= range_begin and current_time <= range_end:
+    return True
+  return False
+
+
 
 if __name__ == '__main__':
     create_spotify(app.config["APP_ID"] , app.config["APP_SECRET"], scope)

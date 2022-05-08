@@ -1,0 +1,16 @@
+<!doctype html>
+
+  <h1> Bathbuddy config</h1>
+  <form method="POST">
+    <div><label>Playlist (default): <input type="text" name="playlist" value="{{ config['PLAYLIST_ID'] }}" size="25"></label>( {{ playlist_names[config['PLAYLIST_ID']] }} )</div>
+    <div><label>Playlist (timerange1): <input type="text" name="playlist1" value="{{ config['PLAYLIST_ID_1'] }}" size="25"></label>( {{ playlist_names[config['PLAYLIST_ID_1']] }} )</div>
+    <div><label>Playlist (timerange2): <input type="text" name="playlist2" value="{{ config['PLAYLIST_ID_2'] }}" size="25"></label>( {{ playlist_names[config['PLAYLIST_ID_2']] }} )</div>
+    <div><label>Playlist (timerange3): <input type="text" name="playlist3" value="{{ config['PLAYLIST_ID_3'] }}" size="25"></label>( {{ playlist_names[config['PLAYLIST_ID_3']] }} )</div>
+
+    <div><label>Timerange 1: <input type="text" name="timerange1" value="{{ config['TIMERANGE_1'] }}"></label></div>
+    <div><label>Timerange 2: <input type="text" name="timerange2" value="{{ config['TIMERANGE_2'] }}"></label></div>
+    <div><label>Timerange 3: <input type="text" name="timerange3" value="{{ config['TIMERANGE_3'] }}"></label></div>
+
+    <div><label>No Playtime: <input type="text" name="no_play_time" value="{{ config['NO_PLAY_TIME'] }}"></label></div>
+    <input type="submit" value="Submit">
+  </form>

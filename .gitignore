@@ -134,3 +134,5 @@ dmypy.json
 .vscode/launch.json
 .vscode/ipch
 secrets.h
+settings.cfg
+.cache
