@@ -35,6 +35,7 @@ def config():
       app.config['TIMERANGE_3'] = verify_timerange(request.form.get('timerange3'))
       app.config['NO_PLAY_TIME'] = verify_timerange(request.form.get('no_play_time'))
 
+      app.logger.info('writing new config')
       conffile = open("/app/settings.cfg","w+")
       conffile.write("APP_ID = \"%s\"\n" % app.config['APP_ID'])
       conffile.write("APP_SECRET = \"%s\"\n" % app.config['APP_SECRET'])
@@ -121,17 +122,17 @@ def playmusic(duration):
 
     fetch_bathplayer(app.config["BATHPLAYER_NAME"])
 
-    if withinTimerange(app.config("NO_PLAY_TIME")):
+    if withinTimerange(app.config["NO_PLAY_TIME"]):
       return
 
     plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID"]
-    if withinTimerange(app.config("TIMERANGE1")):
+    if withinTimerange(app.config["TIMERANGE_1"]):
       if app.config["PLAYLIST_ID_1"] != "--":
         plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID_1"]
-    if withinTimerange(app.config("TIMERANGE2")):
+    if withinTimerange(app.config["TIMERANGE_2"]):
       if app.config["PLAYLIST_ID_2"] != "--":
         plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID_2"]
-    if withinTimerange(app.config("TIMERANGE3")):
+    if withinTimerange(app.config["TIMERANGE_3"]):
       if app.config["PLAYLIST_ID_3"] != "--":
         plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID_3"]
 
@@ -205,7 +206,9 @@ def verify_playlist(playlist_id):
   return playlistname
 
 def withinTimerange(range):
+  app.logger.info('checking within range %s', range)
   if range == "--":
+    app.logger.info('%s not in range', range)
     return False
   timerange = range.split("-")
 
@@ -214,13 +217,14 @@ def withinTimerange(range):
 
   if timerange[0] <= timerange[1]:
     range_begin = time.strptime(today + " " + timerange[0], "%d %m %Y %H")
-    range_end = time.strptime(today + " " + timerange[0], "%d %m %Y %H")
+    range_end = time.strptime(today + " " + timerange[1], "%d %m %Y %H")
   if timerange[0] > timerange[1]:
-    yesterday = time.localtime(time.time()-86400)
+    yesterday = time.strftime("%d %m %Y", time.localtime(time.time()-86400))
     range_begin = time.strptime(yesterday + " " + timerange[0], "%d %m %Y %H")
-    range_end = time.strptime(today + " " + timerange[0], "%d %m %Y %H")
+    range_end = time.strptime(today + " " + timerange[1], "%d %m %Y %H")
 
-  if current_time >= range_begin and current_time <= range_end:
+  app.logger.info('verifying if %s is between %s and %s', time.strftime("%H:%d.%m.%Y", current_time), time.strftime("%H:%d.%m.%Y", range_begin), time.strftime("%H:%d.%m.%Y", range_end))
+  if current_time >= range_begin and current_time < range_end:
     return True
   return False
 

@@ -1,13 +1,13 @@
 version: "2.4"
 services:
-  # spotifyd:
-  #   image: ggoussard/spotifyd:latest
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./config/spotifyd.conf:/etc/spotifyd.conf
-  #     - /usr/share/alsa:/usr/share/alsa
-  #   devices:
-  #     - /dev/snd:/dev/snd
+  spotifyd:
+    image: ggoussard/spotifyd:latest
+    restart: unless-stopped
+    volumes:
+      - ./config/spotifyd.conf:/etc/spotifyd.conf
+      - /usr/share/alsa:/usr/share/alsa
+    devices:
+      - /dev/snd:/dev/snd
   bathbuddy:
     image: romulusai/bathbuddy:latest
     restart: unless-stopped
@@ -17,3 +17,4 @@ services:
       - ./config/settings.cfg:/app/settings.cfg
       - ./config/.cache:/app/.cache
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/timezone:/etc/timezone:ro
