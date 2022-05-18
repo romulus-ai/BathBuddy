@@ -59,6 +59,8 @@ void wifiSetup() {
 
   Serial.println("[WIFI] STATION Mode connected, SSID: " + WiFi.SSID() + ", IP-Adresse: " + WiFi.localIP().toString());
   #endif
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
 }
 
 #ifdef NODEMCU
@@ -79,8 +81,8 @@ void setup() {
   // since we use 3 pins, we can only debug when using a nodemcu board
   #ifdef NODEMCU
   Serial.begin(115200);
-  // Wait for serial to initialize.
-  while(!Serial) { }
+  Serial.println("Started");
+
   pinMode(STATUS_LED, OUTPUT); // Initialize the LED pin as an output
   digitalWrite(STATUS_LED, LOW); // Let the LED shine
   #endif
