@@ -123,8 +123,11 @@ def playmusic(duration):
     fetch_bathplayer(app.config["BATHPLAYER_NAME"])
 
     if withinTimerange(app.config["NO_PLAY_TIME"]):
+      app.logger.info('In silent hours, abourt playing')
       return
+    app.logger.info('Not in silent hours')
 
+    app.logger.info('Check for the timerange to play the desired playlist')
     plstr = 'spotify:playlist:' + app.config["PLAYLIST_ID"]
     if withinTimerange(app.config["TIMERANGE_1"]):
       if app.config["PLAYLIST_ID_1"] != "--":
@@ -225,7 +228,9 @@ def withinTimerange(range):
 
   app.logger.info('verifying if %s is between %s and %s', time.strftime("%H:%d.%m.%Y", current_time), time.strftime("%H:%d.%m.%Y", range_begin), time.strftime("%H:%d.%m.%Y", range_end))
   if current_time >= range_begin and current_time < range_end:
+    app.logger.info('%s is in range', current_time)
     return True
+  app.logger.info('%s is not in range', current_time)
   return False
 
 
