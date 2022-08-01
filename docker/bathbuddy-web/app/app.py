@@ -213,23 +213,28 @@ def withinTimerange(range):
   if range == "--":
     app.logger.info('%s not in range', range)
     return False
-  timerange = range.split("-")
+
+  timerange = []
+  for value in range.split("-"):
+    timerange.append(int(value))
 
   current_time = time.localtime()
-  today = time.strftime("%d %m %Y", current_time)
-
+  current_hour = int(time.strftime("%H", current_time))
+  app.logger.info('verifying if %s is between %s and %s', time.strftime("%H", current_time), timerange[0], timerange[1])
+  
   if timerange[0] <= timerange[1]:
-    range_begin = time.strptime(today + " " + timerange[0], "%d %m %Y %H")
-    range_end = time.strptime(today + " " + timerange[1], "%d %m %Y %H")
+    if current_hour >= timerange[0] and current_hour < timerange[1]:
+      app.logger.info('%s is in range', current_time)
+      return True
+    
   if timerange[0] > timerange[1]:
-    yesterday = time.strftime("%d %m %Y", time.localtime(time.time()-86400))
-    range_begin = time.strptime(yesterday + " " + timerange[0], "%d %m %Y %H")
-    range_end = time.strptime(today + " " + timerange[1], "%d %m %Y %H")
-
-  app.logger.info('verifying if %s is between %s and %s', time.strftime("%H:%d.%m.%Y", current_time), time.strftime("%H:%d.%m.%Y", range_begin), time.strftime("%H:%d.%m.%Y", range_end))
-  if current_time >= range_begin and current_time < range_end:
-    app.logger.info('%s is in range', current_time)
-    return True
+    if current_hour >= timerange[0] and current_hour <= 23:
+      app.logger.info('%s is in range', current_time)
+      return True
+    if current_hour >= 0 and current_hour < timerange[1]:
+      app.logger.info('%s is in range', current_time)
+      return True
+    
   app.logger.info('%s is not in range', current_time)
   return False
 
