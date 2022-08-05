@@ -6,6 +6,8 @@ Bathbuddy is you smart buddy to help you catch the nice time for handwashing and
 ## Requirements
 
 A registered App at "https://developer.spotify.com/" you will need the clientid and the client secret.
+When you register the app, you can give it the name you want. However, configure the redirect URL "http://localhost:8888" for your app.
+
 A Spotify Premium Account
 A Device registered at spotify to play the music on. Here I suggest using spotifyd.
 Maybe a Raspberry Pi with hifiberry oder some music box connected
